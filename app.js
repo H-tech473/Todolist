@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://"+(process.env.name || `harman`)+":"+(process.env.password || `uzOCWIXoycQstfM2`)+"@cluster0.upwjcyv.mongodb.net/ListItem?retryWrites=true&w=majority", {useNewUrlParser: true});
+mongoose.connect("mongodb+srv://"+(process.env.name)+":"+(process.env.password)+"@cluster0.upwjcyv.mongodb.net/ListItem?retryWrites=true&w=majority", {useNewUrlParser: true});
 const Item = new mongoose.Schema({name: String});
 const Item_mod = mongoose.model("Items", Item);
 
