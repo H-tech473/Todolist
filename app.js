@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://"+process.env.name+":"+process.env.password+"@cluster0.upwjcyv.mongodb.net/ListItem?retryWrites=true&w=majority", {useNewUrlParser: true});
+mongoose.connect("mongodb+srv://"+(process.env.name || `harman`)+":"+(process.env.password || `uzOCWIXoycQstfM2`)+"@cluster0.upwjcyv.mongodb.net/ListItem?retryWrites=true&w=majority", {useNewUrlParser: true});
 const Item = new mongoose.Schema({name: String});
 const Item_mod = mongoose.model("Items", Item);
 
@@ -28,9 +28,9 @@ const item3 = new Item_mod({
   name: "Drinking Tea"
 })
 
-const defaultlist = [item1, item2, item3];
+// Item_mod.insertMany([item1,item2,item3]).then(()=>{console.log("done")})
 
-Item_mod
+const defaultlist = [item1, item2, item3];
 
 const listSchema = {
   name: String,
@@ -47,8 +47,9 @@ app.get("/", function(req, res) {
 app.post("/", function(req, res){
 
   const item = new Item_mod({name: req.body.newItem});
-  item.save();
+  item.save().then(()=>{
   res.redirect("/");
+  });
 });
 
 app.get("/about", function(req, res){
@@ -58,9 +59,9 @@ app.get("/about", function(req, res){
 app.post("/delete", (req,res)=>{
   
   const id =req.body.checkbox;
-  Item_mod.findByIdAndRemove(id).then(()=>{});
-  
-  res.redirect("/");
+  Item_mod.findByIdAndRemove(id).then(()=>{
+    res.redirect("/");
+  });
 })
 
 app.get("/:topic", function(req,res){
@@ -72,7 +73,6 @@ app.get("/:topic", function(req,res){
   List.find({name: customList}).then(result=>{
     if(result.length===0){
       listt.save();
-      console.log(listt);
       res.render("list", {listTitle: customList+" List", newListItems: defaultlist, address: customList, addres: "/"+customList});
     }else{
       res.render("list", {listTitle: result[0].name+" List", newListItems: result[0].items, address: customList, addres: "/"+customList});
@@ -86,16 +86,19 @@ app.post("/:topic", (req,res)=>{
   List.findOne({name: req.params.topic}).then((result)=>{
     result.items.push(item5);
     result.save();
+    res.redirect("/"+req.params.topic);
   })
-  res.redirect("/"+req.params.topic);
+  
 })
 
 app.post("/delete/:topic", (req,res)=>{
   List.findOneAndUpdate(
     {name: req.params.topic},
     {$pull: {items: {_id: req.body.checkbox}}}
-  ).then(()=>{})
-  res.redirect("/"+req.params.topic);
+  ).then(()=>{
+    res.redirect("/"+req.params.topic);
+  })
+  
 })
 
 
